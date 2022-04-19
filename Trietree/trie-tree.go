@@ -135,3 +135,83 @@ func set(res *[]string, str string) bool {
 	}
 	return true
 }
+
+type Trie struct {
+	children [60]*Trie
+	word     string
+}
+
+func (t *Trie) Insert(word string) {
+	node := t
+	for _, ch := range word {
+		ch -= 'A'
+		if node.children[ch] == nil {
+			node.children[ch] = &Trie{}
+		}
+		node = node.children[ch]
+	}
+	node.word = word
+}
+
+func exist(board [][]byte, word string) bool {
+
+	//方向数组
+	dx := [4]int{-1, 0, 0, 1}
+	dy := [4]int{0, -1, 1, 0}
+
+	//1.建立tire树 插入进去
+	t := &Trie{}
+	t.Insert(word)
+
+	m, n := len(board), len(board[0])
+	visited := make([][]bool, m)
+
+	for i := 0; i < m; i++ {
+		visited[i] = make([]bool, n)
+	}
+	var ans bool
+	//枚举每个节点
+	var dfs func(node *Trie, x, y int)
+	dfs = func(node *Trie, x, y int) {
+		ch := board[x][y]
+
+		node = node.children[ch-'A']
+		if node == nil {
+			return
+		}
+		//
+		if node.word != "" {
+			ans = true
+		}
+
+		for i := 0; i < 4; i++ {
+			nx, ny := x+dx[i], y+dy[i]
+
+			if nx < 0 || ny < 0 || nx >= m || ny >= n {
+				continue
+			}
+			if visited[nx][ny] == true {
+				continue
+			}
+			//已经访问过
+			visited[nx][ny] = true
+
+			dfs(node, nx, ny)
+			//还原现场
+			visited[nx][ny] = false
+
+		}
+
+	}
+
+	for i := 0; i < m; i++ {
+		for j := 0; j < n; j++ {
+			visited[i][j] = true
+			dfs(t, i, j)
+			visited[i][j] = false
+		}
+	}
+
+	return ans
+
+}

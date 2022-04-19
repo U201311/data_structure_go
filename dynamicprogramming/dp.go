@@ -90,3 +90,39 @@ func min(a, b int) int {
 	}
 	return b
 }
+
+func minDistance(word1 string, word2 string) int {
+	/*
+	   dp[i][j]:word1的第i个字符变到word第j个字符最少变动次数
+	   dp动态方程：
+	   if word1[i] == word2[j] dp[i][j] = dp[i-1][j-1]
+	   else:
+	   dp[i][j] = min(dp[i-1][j], dp[i][j-1],dp[i-1][j-1]) + 1
+	   dp[i-1][j] :word1删除
+	   dp[i][j-1]:word2插入
+	   dp[i-1][j-1]:word1 & word2替换
+	*/
+
+	n := len(word1)
+	m := len(word2)
+	dp := make([][]int, n+1)
+	for i := 0; i < n+1; i++ {
+		dp[i] = make([]int, m+1)
+	}
+	for i := 0; i < n+1; i++ {
+		dp[i][0] = i
+	}
+	for i := 0; i < m+1; i++ {
+		dp[0][i] = i
+	}
+
+	for i := 1; i < n+1; i++ {
+		for j := 1; j < m+1; j++ {
+			dp[i][j] = min(min(dp[i-1][j], dp[i][j-1]), dp[i-1][j-1]) + 1
+			if word1[i-1] == word2[j-1] {
+				dp[i][j] = min(dp[i][j], dp[i-1][j-1])
+			}
+		}
+	}
+	return dp[n][m]
+}
